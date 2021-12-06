@@ -8,97 +8,124 @@ struct Line {
     var endY: Int
 }
 
+func updateCount(forKey key: String, dictionary: inout [String: Int]) {
+    if let count = dictionary[key] {
+        dictionary[key] = count + 1
+    } else {
+        dictionary[key] = 1
+    }
+}
+
+func totalOverlaps(inDictionary dictionary: [String: Int]) -> Int {
+    var count = 0
+    for cross in dictionary.values {
+        if cross > 1 {
+            count += 1
+        }
+    }
+    return count
+}
+
 func part1(_ input: [Line]) -> Int {
     var xyCounts = [String: Int]()
+
     for line in input {
         if line.startX == line.endX {
             let start = min(line.startY, line.endY)
             let end = max(line.startY, line.endY)
             for y in start ... end {
-                if let count = xyCounts["\(line.startX),\(y)"] {
-                    xyCounts["\(line.startX),\(y)"] = count + 1
-                } else {
-                    xyCounts["\(line.startX),\(y)"] = 1
-                }
+                let key = "\(line.startX),\(y)"
+                updateCount(forKey: key, dictionary: &xyCounts)
             } 
         }
         if line.startY == line.endY {
             let start = min(line.startX, line.endX)
             let end = max(line.startX, line.endX)
             for x in start ... end {
-                if let count = xyCounts["\(x),\(line.startY)"] {
-                    xyCounts["\(x),\(line.startY)"] = count + 1
-                } else {
-                    xyCounts["\(x),\(line.startY)"] = 1
-                }
+                let key = "\(x),\(line.startY)"
+                updateCount(forKey: key, dictionary: &xyCounts)
             } 
         }
     }
 
-    var count = 0
-    for cross in xyCounts.values {
-        if cross > 1 {
-            count += 1
-        }
-    }
-
-    return count
+    return totalOverlaps(inDictionary: xyCounts)
 }
 
 func part2(_ input: [Line]) -> Int {
     var xyCounts = [String: Int]()
     for line in input {
+        // Horizontal lines
         if line.startX == line.endX {
             let start = min(line.startY, line.endY)
             let end = max(line.startY, line.endY)
             for y in start ... end {
-                if let count = xyCounts["\(line.startX),\(y)"] {
-                    xyCounts["\(line.startX),\(y)"] = count + 1
-                } else {
-                    xyCounts["\(line.startX),\(y)"] = 1
-                }
+                let key = "\(line.startX),\(y)"
+                updateCount(forKey: key, dictionary: &xyCounts)
             } 
         }
+        // Vertical lines
         if line.startY == line.endY {
             let start = min(line.startX, line.endX)
             let end = max(line.startX, line.endX)
             for x in start ... end {
-                if let count = xyCounts["\(x),\(line.startY)"] {
-                    xyCounts["\(x),\(line.startY)"] = count + 1
-                } else {
-                    xyCounts["\(x),\(line.startY)"] = 1
-                }
-            } 
+                let key = "\(x),\(line.startY)"
+                updateCount(forKey: key, dictionary: &xyCounts)
+            }
         }
-        if line.startX != line.endX 
+        // Diagonal lines
+        if line.startX != line.endX
             && line.startY != line.endY {
-            print("Found a diagonal: \(line)")
-            if line.startX == line.endX 
-                && line.startY == line.endY {
 
-                    let start = min(line.startX, line.startY)
-                    let end = max(line.startX, line.startY)
+            if line.startX == line.startY
+                && line.endX == line.endY {
+
+                    let start = min(line.startX, line.endX)
+                    let end = max(line.startY, line.endY)
                     for xy in start ... end {
-                        if let count = xyCounts["\(xy),\(xy)"] {
-                            xyCounts["\(xy),\(xy)"] = count + 1
-                        } else {
-                            xyCounts["\(xy),\(xy)"] = 1
-                        }
+                        let key = "\(xy),\(xy)"
+                        updateCount(forKey: key, dictionary: &xyCounts)
                     }
-            } else {
-                
+            } else if line.startX > line.endX
+                        && line.startY > line.endY {
+
+                var yIndex = line.startY
+                for x in stride(from: line.startX, through: line.endX, by: -1) {
+                    let key = "\(x),\(yIndex)"
+                    updateCount(forKey: key, dictionary: &xyCounts)
+                    yIndex -= 1
+                }
+            } else if line.startX > line.endX
+                        && line.startY < line.endY {
+
+                var yIndex = line.startY
+                for x in stride(from: line.startX, through: line.endX, by: -1) {
+                    let key = "\(x),\(yIndex)"
+                    updateCount(forKey: key, dictionary: &xyCounts)
+                    yIndex += 1
+                }
+            } else if line.startX < line.endX
+                        && line.startY > line.endY {
+
+                var xIndex = line.startX
+                for y in stride(from: line.startY, through: line.endY, by: -1) {
+                    let key = "\(xIndex),\(y)"
+                    updateCount(forKey: key, dictionary: &xyCounts)
+                    xIndex += 1
+                }
+            } else if line.startX < line.endX
+                        && line.startY < line.endY {
+
+                var yIndex = line.startY
+                for x in line.startX ... line.endX {
+                    let key = "\(x),\(yIndex)"
+                    updateCount(forKey: key, dictionary: &xyCounts)
+                    yIndex += 1
+                }
             }
         }
     }
 
-    var count = 0
-    for cross in xyCounts.values {
-        if cross > 1 {
-            count += 1
-        }
-    }
-
-    return count
+    return totalOverlaps(inDictionary: xyCounts)
 }
 
 let rawFileContents = try! String(contentsOfFile: "AOCInput5.txt")
