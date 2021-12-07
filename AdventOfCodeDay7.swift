@@ -50,8 +50,8 @@ let inputArray = rawFileContents.split(separator: "\n")[0].split(separator: ",")
 print("Part1: \(part1(inputArray))")
 print("Part2: \(part2(inputArray))")
 
-// swiftc -o AdventOfCodeDay6 AdventOfCodeDay6.swift
-// ./AdventOfCodeDay6
+// swiftc -o AdventOfCodeDay7 AdventOfCodeDay7.swift
+// ./AdventOfCodeDay7
 
 
 
